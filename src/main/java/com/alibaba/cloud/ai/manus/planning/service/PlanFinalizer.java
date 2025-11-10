@@ -15,15 +15,10 @@
  */
 package com.alibaba.cloud.ai.manus.planning.service;
 
-import com.alibaba.cloud.ai.manus.config.ManusProperties;
-import com.alibaba.cloud.ai.manus.llm.ILlmService;
-import com.alibaba.cloud.ai.manus.llm.StreamingResponseHandler;
-import com.alibaba.cloud.ai.manus.prompt.model.enums.PromptEnum;
-import com.alibaba.cloud.ai.manus.prompt.service.PromptService;
-import com.alibaba.cloud.ai.manus.recorder.service.PlanExecutionRecorder;
-import com.alibaba.cloud.ai.manus.runtime.entity.vo.ExecutionContext;
-import com.alibaba.cloud.ai.manus.runtime.entity.vo.PlanExecutionResult;
-import com.alibaba.cloud.ai.manus.workspace.conversation.advisor.CustomMessageChatMemoryAdvisor;
+import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
+
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +26,19 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.stereotype.Service;
+
+import com.alibaba.cloud.ai.manus.config.ManusProperties;
+import com.alibaba.cloud.ai.manus.llm.LlmService;
+import com.alibaba.cloud.ai.manus.llm.StreamingResponseHandler;
+import com.alibaba.cloud.ai.manus.recorder.service.PlanExecutionRecorder;
+import com.alibaba.cloud.ai.manus.runtime.entity.vo.ExecutionContext;
+import com.alibaba.cloud.ai.manus.runtime.entity.vo.PlanExecutionResult;
+import com.alibaba.cloud.ai.manus.runtime.service.TaskInterruptionManager;
+import com.alibaba.cloud.ai.manus.workspace.conversation.advisor.CustomMessageChatMemoryAdvisor;
+
 import reactor.core.publisher.Flux;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 
 /**
  * Refactored PlanFinalizer with improved code organization and reduced duplication
@@ -47,23 +48,23 @@ public class PlanFinalizer {
 
 	private static final Logger log = LoggerFactory.getLogger(PlanFinalizer.class);
 
-	private final ILlmService llmService;
+	private final LlmService llmService;
 
 	private final PlanExecutionRecorder recorder;
-
-	private final PromptService promptService;
 
 	private final ManusProperties manusProperties;
 
 	private final StreamingResponseHandler streamingResponseHandler;
 
-	public PlanFinalizer(ILlmService llmService, PlanExecutionRecorder recorder, PromptService promptService,
-			ManusProperties manusProperties, StreamingResponseHandler streamingResponseHandler) {
+	private final TaskInterruptionManager taskInterruptionManager;
+
+	public PlanFinalizer(LlmService llmService, PlanExecutionRecorder recorder, ManusProperties manusProperties,
+			StreamingResponseHandler streamingResponseHandler, TaskInterruptionManager taskInterruptionManager) {
 		this.llmService = llmService;
 		this.recorder = recorder;
-		this.promptService = promptService;
 		this.manusProperties = manusProperties;
 		this.streamingResponseHandler = streamingResponseHandler;
+		this.taskInterruptionManager = taskInterruptionManager;
 	}
 
 	/**
@@ -75,8 +76,18 @@ public class PlanFinalizer {
 		Map<String, Object> promptVariables = Map.of("executionDetail",
 				context.getPlan().getPlanExecutionStateStringFormat(false), "userRequest", context.getUserRequest());
 
-		generateWithLlm(context, result, PromptEnum.PLANNING_PLAN_FINALIZER.getPromptName(), promptVariables, "summary",
-				"Generated summary: {}");
+		String summaryPrompt = """
+				You are jmanus, an AI assistant capable of responding to user requests. You need to respond to the user's request based on the execution results of this step-by-step execution plan.
+
+				The current user request is:
+				{userRequest}
+
+				Step-by-step plan execution details:
+				{executionDetail}
+
+				Please respond to the user's request based on the information in the execution details.
+				""";
+		generateWithLlm(context, result, summaryPrompt, promptVariables, "summary", "Generated summary: {}");
 	}
 
 	/**
@@ -90,7 +101,14 @@ public class PlanFinalizer {
 
 		Map<String, Object> promptVariables = Map.of("userRequest", userRequest);
 
-		generateWithLlm(context, result, PromptEnum.DIRECT_RESPONSE.getPromptName(), promptVariables, "direct response",
+		String directResponsePrompt = """
+				You are jmanus, an AI assistant capable of responding to user requests. Currently in direct feedback mode, you need to directly respond to the user's simple requests without complex planning and decomposition.
+
+				The current user request is:
+
+				{userRequest}
+				""";
+		generateWithLlm(context, result, directResponsePrompt, promptVariables, "direct response",
 				"Generated direct response: {}");
 	}
 
@@ -99,15 +117,20 @@ public class PlanFinalizer {
 	 */
 	private String generateLlmResponse(ExecutionContext context, String promptName, Map<String, Object> variables,
 			String operationName) {
-		Message message = promptService.createUserMessage(promptName, variables);
+
+		PromptTemplate template = new PromptTemplate(promptName);
+
+		Message message = template.createMessage(variables != null ? variables : Map.of());
+
 		Prompt prompt = new Prompt(List.of(message));
 
-		ChatClient.ChatClientRequestSpec requestSpec = llmService.getPlanningChatClient().prompt(prompt);
+		ChatClient.ChatClientRequestSpec requestSpec = llmService.getDiaChatClient().prompt(prompt);
 		configureMemoryAdvisors(requestSpec, context);
 
 		Flux<ChatResponse> responseFlux = requestSpec.stream().chatResponse();
+		boolean isDebugModel = manusProperties.getDebugDetail() != null && manusProperties.getDebugDetail();
 		return streamingResponseHandler.processStreamingTextResponse(responseFlux, operationName,
-				context.getCurrentPlanId());
+				context.getCurrentPlanId(), isDebugModel);
 	}
 
 	/**
@@ -160,6 +183,13 @@ public class PlanFinalizer {
 		}
 
 		try {
+			// Check if the task was interrupted
+			if (isTaskInterrupted(context, result)) {
+				log.debug("Task was interrupted for plan: {}", context.getCurrentPlanId());
+				handleInterruptedTask(context, result);
+				return result;
+			}
+
 			// Check if we need to generate a summary
 			if (context.isNeedSummary()) {
 				log.debug("Generating LLM summary for plan: {}", context.getCurrentPlanId());
@@ -234,6 +264,92 @@ public class PlanFinalizer {
 	private void handleLlmError(String operationType, Exception e) {
 		log.error("Error generating {} with LLM", operationType, e);
 		throw new RuntimeException("Failed to generate " + operationType, e);
+	}
+
+	/**
+	 * Check if the task execution was interrupted
+	 * @param context Execution context containing root plan ID
+	 * @param result The execution result to check
+	 * @return true if the task was interrupted, false otherwise
+	 */
+	private boolean isTaskInterrupted(ExecutionContext context, PlanExecutionResult result) {
+		if (result == null) {
+			return false;
+		}
+
+		// First, check the actual database state to verify if task was marked for
+		// interruption
+		if (context != null && context.getRootPlanId() != null && taskInterruptionManager != null) {
+			try {
+				boolean shouldInterrupt = taskInterruptionManager.shouldInterruptTask(context.getRootPlanId());
+				if (shouldInterrupt) {
+					log.debug("Task {} is marked for interruption in database", context.getRootPlanId());
+					return true;
+				}
+			}
+			catch (Exception e) {
+				log.warn("Error checking interruption status for planId: {}, falling back to error message check",
+						context.getRootPlanId(), e);
+				// Fall through to error message check
+			}
+		}
+
+		// Fallback: Check if errorMessage indicates interruption with specific patterns
+		// Only match specific interruption messages to avoid false positives
+		String errorMessage = result.getErrorMessage();
+		if (errorMessage != null) {
+			String lowerErrorMessage = errorMessage.toLowerCase();
+			// Match specific interruption patterns that are set by the system
+			if (lowerErrorMessage.contains("plan execution interrupted by user")
+					|| lowerErrorMessage.contains("execution interrupted by user")
+					|| lowerErrorMessage.contains("tool execution interrupted by user")
+					|| lowerErrorMessage.contains("action interrupted by user")
+					|| lowerErrorMessage.contains("agent thinking interrupted")
+					|| lowerErrorMessage.contains("task execution was interrupted by user")) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Handle interrupted task execution
+	 * @param context Execution context
+	 * @param result Execution result to update
+	 */
+	private void handleInterruptedTask(ExecutionContext context, PlanExecutionResult result) {
+		log.info("Handling interrupted task for plan: {}", context.getCurrentPlanId());
+
+		// Set correct status for interrupted task
+		result.setSuccess(false);
+		result.setErrorMessage("Task execution was interrupted by user");
+
+		// Generate appropriate interruption message
+		String interruptionMessage = generateInterruptionMessage(context, result);
+		result.setFinalResult(interruptionMessage);
+
+		// Record the interruption
+		recordPlanCompletion(context, interruptionMessage);
+		log.info("Task interruption handled: {}", interruptionMessage);
+	}
+
+	/**
+	 * Generate appropriate message for interrupted task
+	 * @param context Execution context
+	 * @param result Execution result
+	 * @return Formatted interruption message
+	 */
+	private String generateInterruptionMessage(ExecutionContext context, PlanExecutionResult result) {
+		String userRequest = context.getUserRequest();
+		StringBuilder message = new StringBuilder();
+		message.append("❌ **Task Interrupted**\n\n");
+		message.append("Your request \"")
+			.append(userRequest)
+			.append("\" was interrupted and could not be completed.\n\n");
+		message.append("**Status:** Task stopped by user request\n");
+
+		return message.toString();
 	}
 
 }

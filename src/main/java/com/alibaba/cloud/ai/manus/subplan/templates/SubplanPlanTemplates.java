@@ -34,47 +34,12 @@ public class SubplanPlanTemplates {
 		Map<String, String> templates = new HashMap<>();
 
 		// Content extraction templates
-		templates.put("extract_relevant_content_template", getExtractRelevantContentTemplate());
+		// templates.put("extract_relevant_content_template",
+		// getExtractRelevantContentTemplate());
+		// templates.put("extract_relevant_content_template",
+		// getExtractRelevantContentTemplateWithDynamicAgent());
 
 		return templates;
-	}
-
-	/**
-	 * Get extract relevant content plan template
-	 * @return Extract relevant content template JSON
-	 */
-	public static String getExtractRelevantContentTemplate() {
-		return """
-				{
-				  "planType": "advanced",
-				  "planId": "<<planId>>",
-				  "title": "Intelligent content summarization for files or directories, with final merged file name output in summary",
-				  "steps": [
-					{
-					  "type": "mapreduce",
-					  "dataPreparedSteps": [
-						{
-						  "stepRequirement": "[MAPREDUCE_DATA_PREPARE_AGENT] Use map_reduce_tool to split content of file or directory <<fileName>>"
-						}
-					  ],
-					  "mapSteps": [
-						{
-						  "stepRequirement": "[MAPREDUCE_MAP_TASK_AGENT] Analyze file, find key information related to ```<<queryKey>>```, information should be comprehensive, including all data, facts and opinions, comprehensive information without omission. Output format specification: ``` <<outputFormatSpecification>>```. File format requirement: Markdown."
-						}
-					  ],
-					  "reduceSteps": [
-						{
-						  "stepRequirement": "[MAPREDUCE_REDUCE_TASK_AGENT] Merge the information from this chunk into file, while maintaining information integrity, merge all content and remove results with no content found. Output format specification: <<outputFormatSpecification>>. File format requirement: Markdown."
-						}
-					  ],
-					  "postProcessSteps": [
-						{
-						  "stepRequirement": "[MAPREDUCE_FIN_AGENT] After export completion, read the exported results and output all exported content completely. Output format specification: <<outputFormatSpecification>>. File format requirement: Markdown."
-						}
-					  ]
-					}
-				  ]
-				}""";
 	}
 
 }

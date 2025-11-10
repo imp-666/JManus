@@ -18,45 +18,29 @@
 
 import type { CronConfig } from '@/types/cron-task'
 import { LlmCheckService } from '@/utils/llm-check'
+import { DirectApiService } from '@/api/direct-api-service'
 
 export class PlanActApiService {
   private static readonly PLAN_TEMPLATE_URL = '/api/plan-template'
   private static readonly CRON_TASK_URL = '/api/cron-tasks'
 
-  // Generate plan
-  public static async generatePlan(query: string, existingJson?: string, planType: string = 'simple'): Promise<any> {
-    return LlmCheckService.withLlmCheck(async () => {
-      const requestBody: Record<string, any> = { query, planType }
-      if (existingJson) requestBody.existingJson = existingJson
-      
-      const response = await fetch(`${this.PLAN_TEMPLATE_URL}/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      })
-      if (!response.ok) throw new Error(`Failed to generate plan: ${response.status}`)
-      const responseData = await response.json()
-      if (responseData.planJson) {
-        try {
-          responseData.plan = JSON.parse(responseData.planJson)
-        } catch {
-          responseData.plan = { error: 'Unable to parse plan data' }
-        }
-      }
-      return responseData
-    })
-  }
-
   // Execute generated plan using ManusController.executeByToolNameAsync
-  public static async executePlan(planTemplateId: string, rawParam?: string, uploadedFiles?: string[], replacementParams?: Record<string, string>, uploadKey?: string): Promise<any> {
+  public static async executePlan(
+    planTemplateId: string,
+    rawParam?: string,
+    uploadedFiles?: string[],
+    replacementParams?: Record<string, string>,
+    uploadKey?: string
+  ): Promise<unknown> {
     return LlmCheckService.withLlmCheck(async () => {
-      console.log('[PlanActApiService] executePlan called with:', { planTemplateId, rawParam, uploadedFiles, replacementParams, uploadKey})
-      
-      // Use planTemplateId as toolName to call executeByToolNameAsync
-      const requestBody: Record<string, any> = { 
-        toolName: planTemplateId  // Use planTemplateId as toolName
-      }
-      
+      console.log('[PlanActApiService] executePlan called with:', {
+        planTemplateId,
+        rawParam,
+        uploadedFiles,
+        replacementParams,
+        uploadKey,
+      })
+
       // Add rawParam to replacementParams if provided (backend expects it in replacementParams)
       if (rawParam) {
         if (!replacementParams) {
@@ -65,118 +49,63 @@ export class PlanActApiService {
         replacementParams['userRequirement'] = rawParam
         console.log('[PlanActApiService] Added rawParam to replacementParams:', rawParam)
       }
-      
-      if (uploadedFiles && uploadedFiles.length > 0) {
-        requestBody.uploadedFiles = uploadedFiles
-        console.log('[PlanActApiService] Including uploaded files:', uploadedFiles.length)
-        console.log('[PlanActApiService] 🔍 DEBUG - uploadedFiles content:', uploadedFiles)
-      } else {
-        console.log('[PlanActApiService] 🔍 DEBUG - No uploaded files to include')
-        console.log('[PlanActApiService] 🔍 DEBUG - uploadedFiles value:', uploadedFiles)
-      }
-      if (replacementParams && Object.keys(replacementParams).length > 0) {
-        requestBody.replacementParams = replacementParams
-        console.log('[PlanActApiService] Including replacement params:', replacementParams)
-      }
-      if (uploadKey) {
-        requestBody.uploadKey = uploadKey
-        console.log('[PlanActApiService] Including uploadKey:', uploadKey)
-      }
-      requestBody.isVueRequest = true
-      
-      console.log('[PlanActApiService] Making request to:', `/api/executor/executeByToolNameAsync`)
-      console.log('[PlanActApiService] Request body:', requestBody)
-      
-      const response = await fetch(`/api/executor/executeByToolNameAsync`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      })
-      
-      console.log('[PlanActApiService] Response status:', response.status, response.ok)
-      
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('[PlanActApiService] Request failed:', errorText)
-        throw new Error(`Failed to execute plan: ${response.status}`)
-      }
-      
-      const result = await response.json()
-      console.log('[PlanActApiService] executePlan response:', result)
-      return result
+
+      // Use the unified DirectApiService method
+      return await DirectApiService.executeByToolName(
+        planTemplateId,
+        replacementParams,
+        uploadedFiles,
+        uploadKey
+      )
     })
   }
 
   // Save plan to server
-  public static async savePlanTemplate(planId: string, planJson: string): Promise<any> {
+  public static async savePlanTemplate(planId: string, planJson: string): Promise<unknown> {
     const response = await fetch(`${this.PLAN_TEMPLATE_URL}/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId, planJson })
+      body: JSON.stringify({ planId, planJson }),
     })
     if (!response.ok) throw new Error(`Failed to save plan: ${response.status}`)
     return await response.json()
   }
 
   // Get all versions of plan
-  public static async getPlanVersions(planId: string): Promise<any> {
+  public static async getPlanVersions(planId: string): Promise<unknown> {
     const response = await fetch(`${this.PLAN_TEMPLATE_URL}/versions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId })
+      body: JSON.stringify({ planId }),
     })
     if (!response.ok) throw new Error(`Failed to get plan versions: ${response.status}`)
     return await response.json()
   }
 
   // Get specific version of plan
-  public static async getVersionPlan(planId: string, versionIndex: number): Promise<any> {
+  public static async getVersionPlan(planId: string, versionIndex: number): Promise<unknown> {
     const response = await fetch(`${this.PLAN_TEMPLATE_URL}/get-version`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId, versionIndex: versionIndex.toString() })
+      body: JSON.stringify({ planId, versionIndex: versionIndex.toString() }),
     })
     if (!response.ok) throw new Error(`Failed to get specific version plan: ${response.status}`)
     return await response.json()
   }
 
   // Get all plan template list
-  public static async getAllPlanTemplates(): Promise<any> {
+  public static async getAllPlanTemplates(): Promise<unknown> {
     const response = await fetch(`${this.PLAN_TEMPLATE_URL}/list`)
     if (!response.ok) throw new Error(`Failed to get plan template list: ${response.status}`)
     return await response.json()
   }
 
-  // Update existing plan template
-  public static async updatePlanTemplate(planId: string, query: string, existingJson?: string, planType: string = 'simple'): Promise<any> {
-    return LlmCheckService.withLlmCheck(async () => {
-      const requestBody: Record<string, any> = { planId, query, planType }
-      if (existingJson) requestBody.existingJson = existingJson
-      
-      const response = await fetch(`${this.PLAN_TEMPLATE_URL}/update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      })
-      if (!response.ok) throw new Error(`Failed to update plan template: ${response.status}`)
-      const responseData = await response.json()
-      if (responseData.planJson) {
-        try {
-          responseData.plan = JSON.parse(responseData.planJson)
-        } catch {
-          responseData.plan = { error: 'Unable to parse plan data' }
-        }
-      }
-      return responseData
-    })
-  }
-
   // Delete plan template
-  public static async deletePlanTemplate(planId: string): Promise<any> {
+  public static async deletePlanTemplate(planId: string): Promise<unknown> {
     const response = await fetch(`${this.PLAN_TEMPLATE_URL}/delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId })
+      body: JSON.stringify({ planId }),
     })
     if (!response.ok) throw new Error(`Failed to delete plan template: ${response.status}`)
     return await response.json()
@@ -187,7 +116,7 @@ export class PlanActApiService {
     const response = await fetch(this.CRON_TASK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cronConfig)
+      body: JSON.stringify(cronConfig),
     })
     if (!response.ok) {
       try {
@@ -199,5 +128,4 @@ export class PlanActApiService {
     }
     return await response.json()
   }
-
 }

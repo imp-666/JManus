@@ -17,6 +17,7 @@
 import { reactive, computed, watch, ref } from 'vue'
 // import { useI18n } from 'vue-i18n' // Currently unused
 import type { StepData, DisplayPlanData } from '@/types/plan-execution'
+import { sidebarStore } from '@/stores/sidebar'
 
 export interface JsonEditorProps {
   jsonContent: string
@@ -41,7 +42,7 @@ export interface JsonEditorEmits {
 export function useJsonEditor(props: JsonEditorProps, emit: JsonEditorEmits) {
   // I18n
   // const { t } = useI18n() // Currently unused
-  
+
   // State
   const showJsonPreview = ref(false)
 
@@ -51,7 +52,7 @@ export function useJsonEditor(props: JsonEditorProps, emit: JsonEditorEmits) {
     steps: [],
     directResponse: false, // Always false for dynamic agent planning
     planTemplateId: props.currentPlanTemplateId || '',
-    planType: 'dynamic_agent'
+    planType: 'dynamic_agent',
   })
 
   /**
@@ -59,38 +60,60 @@ export function useJsonEditor(props: JsonEditorProps, emit: JsonEditorEmits) {
    * Maps backend DynamicAgentExecutionPlan structure to frontend DisplayPlanData
    */
   const parseJsonToVisual = (jsonContent: string) => {
+    console.log('[JsonEditorLogic] parseJsonToVisual called with jsonContent:', jsonContent)
+    console.log(
+      '[JsonEditorLogic] parseJsonToVisual called with currentPlanTemplateId:',
+      props.currentPlanTemplateId
+    )
+
     try {
       if (!jsonContent) {
+        console.log('[JsonEditorLogic] No jsonContent, resetting to default')
         // Reset to default - matches DynamicAgentExecutionPlan structure
         Object.assign(displayData, {
           title: '',
           steps: [],
           directResponse: false,
           planTemplateId: props.currentPlanTemplateId || '',
-          planType: 'dynamic_agent'
+          planType: 'dynamic_agent',
         })
+        console.log('[JsonEditorLogic] Reset displayData to:', displayData)
         return
       }
 
       const parsed = JSON.parse(jsonContent)
-      
+      console.log('[JsonEditorLogic] Parsed JSON:', parsed)
+
       // Map basic fields from DynamicAgentExecutionPlan
       displayData.title = parsed.title || ''
       displayData.directResponse = false // Always false for dynamic agent planning
       displayData.planTemplateId = parsed.planTemplateId || props.currentPlanTemplateId || ''
       displayData.planType = parsed.planType || 'dynamic_agent'
-      
+
       // Parse steps - maps ExecutionStep structure
-      displayData.steps = (parsed.steps || []).map((step: any) => ({
-        stepRequirement: step.stepRequirement || '',
-        agentName: step.agentName || '',
-        modelName: step.modelName || null, // Default to null if not specified
-        selectedToolKeys: step.selectedToolKeys || [],
-        terminateColumns: step.terminateColumns || ''
-      }))
+      displayData.steps = (parsed.steps || []).map((step: unknown) => {
+        const stepObj = step as Record<string, unknown>
+        return {
+          stepRequirement: (stepObj.stepRequirement as string) || '',
+          agentName: (stepObj.agentName as string) || '',
+          modelName: (stepObj.modelName as string | null) || null, // Default to null if not specified
+          selectedToolKeys: (stepObj.selectedToolKeys as string[]) || [],
+          terminateColumns: (stepObj.terminateColumns as string) || '',
+        }
+      })
+
+      console.log('[JsonEditorLogic] Updated displayData to:', displayData)
     } catch (error) {
       console.warn('Failed to parse JSON content:', error)
-      // Keep current data if parsing fails
+      // Reset to default when parsing fails to prevent stale data
+      Object.assign(displayData, {
+        title: '',
+        steps: [],
+        directResponse: false,
+        planTemplateId: props.currentPlanTemplateId || '',
+        planType: 'dynamic_agent',
+      })
+      console.log('[JsonEditorLogic] Error occurred, reset displayData to:', displayData)
     }
   }
 
@@ -100,20 +123,20 @@ export function useJsonEditor(props: JsonEditorProps, emit: JsonEditorEmits) {
    */
   const convertVisualToJson = (): string => {
     try {
-      const result: any = {
+      const result: Record<string, unknown> = {
         title: displayData.title,
         steps: displayData.steps.map(step => ({
           stepRequirement: step.stepRequirement,
           agentName: step.agentName,
-          modelName: step.modelName || '', // Convert null to empty string for JSON
+          modelName: step.modelName ?? '', // Convert null to empty string for JSON
           selectedToolKeys: step.selectedToolKeys,
-          terminateColumns: step.terminateColumns
+          terminateColumns: step.terminateColumns,
         })),
         directResponse: displayData.directResponse,
         planTemplateId: displayData.planTemplateId,
-        planType: displayData.planType
+        planType: displayData.planType,
       }
-      
+
       return JSON.stringify(result, null, 2)
     } catch (error) {
       console.error('Failed to convert visual data to JSON:', error)
@@ -125,22 +148,75 @@ export function useJsonEditor(props: JsonEditorProps, emit: JsonEditorEmits) {
   const formattedJsonOutput = computed(() => convertVisualToJson())
 
   // Watch for JSON content changes
-  watch(() => props.jsonContent, (newContent) => {
-    parseJsonToVisual(newContent)
-  }, { immediate: true })
+  watch(
+    () => props.jsonContent,
+    (newContent, oldContent) => {
+      console.log(
+        '[JsonEditorLogic] Watch triggered - jsonContent changed from',
+        oldContent,
+        'to',
+        newContent
+      )
+      parseJsonToVisual(newContent)
+    },
+    { immediate: true }
+  )
 
   // Watch for display data changes and emit updates
-  watch(displayData, () => {
-    const jsonOutput = convertVisualToJson()
-    emit('update:jsonContent', jsonOutput)
-  }, { deep: true })
+  watch(
+    displayData,
+    () => {
+      const jsonOutput = convertVisualToJson()
+      emit('update:jsonContent', jsonOutput)
+    },
+    { deep: true }
+  )
 
   // Watch for currentPlanTemplateId changes
-  watch(() => props.currentPlanTemplateId, (newId) => {
-    if (newId) {
-      displayData.planTemplateId = newId
+  watch(
+    () => props.currentPlanTemplateId,
+    newId => {
+      if (newId) {
+        displayData.planTemplateId = newId
+      }
     }
-  })
+  )
+
+  // Track initial step requirements to detect actual changes
+  let initialStepRequirements: string[] = []
+  let isInitialLoad = true
+
+  // Watch for stepRequirement/stepContent changes to track modifications
+  watch(
+    () => displayData.steps.map(step => step.stepRequirement || step.stepContent || ''),
+    newRequirements => {
+      // Skip on initial load
+      if (isInitialLoad) {
+        initialStepRequirements = [...newRequirements]
+        isInitialLoad = false
+        return
+      }
+
+      // Only set flag if requirements actually changed
+      const hasChanged =
+        newRequirements.length !== initialStepRequirements.length ||
+        newRequirements.some((req, index) => req !== (initialStepRequirements[index] || ''))
+
+      if (hasChanged) {
+        sidebarStore.hasTaskRequirementModified = true
+      }
+    },
+    { deep: true }
+  )
+
+  // Reset initial state when JSON content changes (new template loaded)
+  watch(
+    () => props.jsonContent,
+    () => {
+      isInitialLoad = true
+      initialStepRequirements = []
+    }
+  )
 
   // Step management functions
   const addStep = () => {
@@ -151,7 +227,7 @@ export function useJsonEditor(props: JsonEditorProps, emit: JsonEditorEmits) {
       selectedToolKeys: [],
       terminateColumns: '',
       agentType: '',
-      stepContent: ''
+      stepContent: '',
     }
     displayData.steps.push(newStep)
   }
@@ -203,20 +279,20 @@ export function useJsonEditor(props: JsonEditorProps, emit: JsonEditorEmits) {
     showJsonPreview,
     displayData,
     formattedJsonOutput,
-    
+
     // Step management
     addStep,
     removeStep,
     moveStepUp,
     moveStepDown,
-    
+
     // JSON preview
     toggleJsonPreview,
     closeJsonPreview,
-    
+
     // Actions
     handleRollback,
     handleRestore,
-    handleSave
+    handleSave,
   }
 }

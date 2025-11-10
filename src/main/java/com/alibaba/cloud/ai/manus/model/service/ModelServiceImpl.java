@@ -15,21 +15,14 @@
  */
 package com.alibaba.cloud.ai.manus.model.service;
 
-import cn.hutool.core.util.StrUtil;
-import com.alibaba.cloud.ai.manus.agent.entity.DynamicAgentEntity;
-import com.alibaba.cloud.ai.manus.agent.repository.DynamicAgentRepository;
-import com.alibaba.cloud.ai.manus.event.JmanusEventPublisher;
-import com.alibaba.cloud.ai.manus.event.ModelChangeEvent;
-import com.alibaba.cloud.ai.manus.model.entity.DynamicModelEntity;
-import com.alibaba.cloud.ai.manus.model.exception.AuthenticationException;
-import com.alibaba.cloud.ai.manus.model.exception.NetworkException;
-import com.alibaba.cloud.ai.manus.model.exception.RateLimitException;
-import com.alibaba.cloud.ai.manus.model.model.vo.AvailableModel;
-import com.alibaba.cloud.ai.manus.model.model.vo.ModelConfig;
-import com.alibaba.cloud.ai.manus.model.model.vo.ValidationResult;
-import com.alibaba.cloud.ai.manus.model.repository.DynamicModelRepository;
-
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +36,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.alibaba.cloud.ai.manus.event.JmanusEventPublisher;
+import com.alibaba.cloud.ai.manus.event.ModelChangeEvent;
+import com.alibaba.cloud.ai.manus.llm.LlmService;
+import com.alibaba.cloud.ai.manus.model.entity.DynamicModelEntity;
+import com.alibaba.cloud.ai.manus.model.exception.AuthenticationException;
+import com.alibaba.cloud.ai.manus.model.exception.NetworkException;
+import com.alibaba.cloud.ai.manus.model.exception.RateLimitException;
+import com.alibaba.cloud.ai.manus.model.model.vo.AvailableModel;
+import com.alibaba.cloud.ai.manus.model.model.vo.ModelConfig;
+import com.alibaba.cloud.ai.manus.model.model.vo.ValidationResult;
+import com.alibaba.cloud.ai.manus.model.repository.DynamicModelRepository;
+
+import cn.hutool.core.util.StrUtil;
 
 @Service
 public class ModelServiceImpl implements ModelService {
@@ -58,20 +57,19 @@ public class ModelServiceImpl implements ModelService {
 
 	private final DynamicModelRepository repository;
 
-	private final DynamicAgentRepository agentRepository;
-
 	@Autowired
 	private JmanusEventPublisher publisher;
+
+	@Autowired
+	private LlmService llmService;
 
 	// Cache for third-party API calls with 2-second expiration
 	private final Map<String, CacheEntry<List<AvailableModel>>> apiCache = new ConcurrentHashMap<>();
 
 	private static final long CACHE_EXPIRY_MS = 2000; // 2 seconds
 
-	@Autowired
-	public ModelServiceImpl(DynamicModelRepository repository, DynamicAgentRepository agentRepository) {
+	public ModelServiceImpl(DynamicModelRepository repository) {
 		this.repository = repository;
-		this.agentRepository = agentRepository;
 	}
 
 	// Cache entry class
@@ -129,6 +127,12 @@ public class ModelServiceImpl implements ModelService {
 
 			entity = repository.save(entity);
 			publisher.publish(new ModelChangeEvent(entity));
+
+			// Refresh cache if this is a default model
+			if (config.getIsDefault() != null && config.getIsDefault()) {
+				llmService.refreshDefaultModelCache();
+			}
+
 			log.info("Successfully created new Model: {}", config.getModelName());
 			return entity.mapToModelConfig();
 		}
@@ -165,21 +169,21 @@ public class ModelServiceImpl implements ModelService {
 	public ModelConfig updateModel(DynamicModelEntity entity) {
 		entity = repository.save(entity);
 		publisher.publish(new ModelChangeEvent(entity));
+
+		// Refresh cache if this is a default model
+		if (entity.getIsDefault() != null && entity.getIsDefault()) {
+			llmService.refreshDefaultModelCache();
+		}
+
 		return entity.mapToModelConfig();
 	}
 
 	@Override
 	public void deleteModel(String id) {
-		if (agentRepository.count() == 1) {
-			throw new IllegalArgumentException("Cannot clear all models");
-		}
-		List<DynamicAgentEntity> allByModel = agentRepository
-			.findAllByModel(new DynamicModelEntity(Long.parseLong(id)));
-		if (allByModel != null && !allByModel.isEmpty()) {
-			allByModel.forEach(dynamicAgentEntity -> dynamicAgentEntity.setModel(null));
-			agentRepository.saveAll(allByModel);
-		}
 		repository.deleteById(Long.parseLong(id));
+
+		// Always refresh cache after deletion to ensure consistency
+		llmService.refreshDefaultModelCache();
 	}
 
 	@Override
@@ -275,7 +279,7 @@ public class ModelServiceImpl implements ModelService {
 		return apiKey.substring(0, 4) + "****" + apiKey.substring(apiKey.length() - 4);
 	}
 
-	private List<AvailableModel> parseModelsResponse(Map response) {
+	private List<AvailableModel> parseModelsResponse(Map<String, Object> response) {
 		log.debug("Starting to parse API response: {}", response);
 
 		List<AvailableModel> models = new ArrayList<>();
@@ -288,11 +292,12 @@ public class ModelServiceImpl implements ModelService {
 		// Try to parse standard OpenAI format: {"data": [...]}
 		Object data = response.get("data");
 		if (data instanceof List) {
-			List<Map> modelList = (List<Map>) data;
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> modelList = (List<Map<String, Object>>) data;
 			log.debug("Found response data containing {} models", modelList.size());
 
 			for (int i = 0; i < modelList.size(); i++) {
-				Map modelData = modelList.get(i);
+				Map<String, Object> modelData = modelList.get(i);
 				log.debug("Parsing model data #{}: {}", i + 1, modelData);
 
 				String modelId = (String) modelData.get("id");
@@ -369,6 +374,9 @@ public class ModelServiceImpl implements ModelService {
 			repository.save(model);
 			log.info("Set {} as default", modelId);
 			publisher.publish(new ModelChangeEvent(model));
+
+			// Refresh cache when setting a new default model
+			llmService.refreshDefaultModelCache();
 		}
 		else {
 			log.error("Cannot find {} model", modelId);
@@ -414,6 +422,7 @@ public class ModelServiceImpl implements ModelService {
 	/**
 	 * Internal method that actually makes the API call
 	 */
+	@SuppressWarnings("deprecation")
 	private List<AvailableModel> callThirdPartyApiInternal(String baseUrl, String apiKey) {
 		log.debug("Starting third-party API call - URL: {}", baseUrl);
 
@@ -436,6 +445,7 @@ public class ModelServiceImpl implements ModelService {
 			// Create HttpEntity to wrap request headers
 			HttpEntity<String> entity = new HttpEntity<>(headers);
 			// Send GET request with HttpEntity containing headers
+			@SuppressWarnings("rawtypes")
 			ResponseEntity<Map> response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, Map.class);
 			long endTime = System.currentTimeMillis();
 
@@ -443,7 +453,9 @@ public class ModelServiceImpl implements ModelService {
 					endTime - startTime);
 
 			// Parse response
-			List<AvailableModel> models = parseModelsResponse(response.getBody());
+			@SuppressWarnings("unchecked")
+			Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
+			List<AvailableModel> models = parseModelsResponse(responseBody);
 			log.info("Successfully parsed response, obtained {} models", models.size());
 
 			return models;

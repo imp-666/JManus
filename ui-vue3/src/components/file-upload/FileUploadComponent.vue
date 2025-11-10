@@ -56,11 +56,16 @@
 import { ref, onUnmounted, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
-import { FileInfo, FileUploadApiService, type DeleteFileResponse, type FileUploadResult } from "@/api/file-upload-api-service"
+import {
+  FileInfo,
+  FileUploadApiService,
+  type DeleteFileResponse,
+  type FileUploadResult,
+} from '@/api/file-upload-api-service'
 
 const { t } = useI18n()
 
-interface Props {
+type FileUploadProps = {
   acceptedFileTypes?: string
   disabled?: boolean
 }
@@ -71,12 +76,13 @@ interface Emits {
   (e: 'upload-key-changed', uploadKey: string | null): void
   (e: 'upload-started'): void
   (e: 'upload-completed'): void
-  (e: 'upload-error', error: any): void
+  (e: 'upload-error', error: unknown): void
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  acceptedFileTypes: '.pdf,.txt,.md,.doc,.docx,.csv,.xlsx,.xls,.json,.xml,.html,.htm,.log,.java,.py,.js,.ts,.sql,.sh,.bat,.yaml,.yml,.properties,.conf,.ini',
-  disabled: false
+const props = withDefaults(defineProps<FileUploadProps>(), {
+  acceptedFileTypes:
+    '.pdf,.txt,.md,.doc,.docx,.csv,.xlsx,.xls,.json,.xml,.html,.htm,.log,.java,.py,.js,.ts,.sql,.sh,.bat,.yaml,.yml,.properties,.conf,.ini,.jpg,.jpeg,.png,.gif',
+  disabled: false,
 })
 
 const emit = defineEmits<Emits>()
@@ -101,9 +107,13 @@ onUnmounted(() => {
 })
 
 // Watch for file changes to emit events
-watch(() => uploadedFiles.value, (newFiles) => {
-  emit('files-removed', newFiles)
-}, { deep: true })
+watch(
+  () => uploadedFiles.value,
+  newFiles => {
+    emit('files-removed', newFiles)
+  },
+  { deep: true }
+)
 
 // File upload handlers
 const handleFileUpload = () => {
@@ -121,15 +131,16 @@ const handleFileChange = async (event: Event) => {
 
   // Convert FileList to Array and add to pending files (for batch upload)
   const fileArray = Array.from(files)
-  console.log('[FileUpload] Selected files for upload:', fileArray.map(f => f.name))
+  console.log(
+    '[FileUpload] Selected files for upload:',
+    fileArray.map(f => f.name)
+  )
 
   // Immediately upload all selected files
   await uploadFiles(fileArray)
 
   // Reset file input
-  if (target) {
-    target.value = ''
-  }
+  target.value = ''
 }
 
 const uploadFiles = async (files: File[]) => {
@@ -142,7 +153,7 @@ const uploadFiles = async (files: File[]) => {
     // Upload files using the new API service
     const result: FileUploadResult = await FileUploadApiService.uploadFiles(files)
 
-    if (result.success && result.uploadedFiles) {
+    if (result.success) {
       // Set uploadKey for file management
       if (!uploadKey.value && result.uploadKey) {
         uploadKey.value = result.uploadKey
@@ -175,7 +186,6 @@ const uploadFiles = async (files: File[]) => {
     // Show success message or update UI as needed
     console.log('Files uploaded successfully:', result)
     emit('upload-completed')
-
   } catch (error) {
     console.error('File upload error:', error)
     emit('upload-error', error)
@@ -191,7 +201,10 @@ const removeFile = async (fileToRemove: FileInfo) => {
 
     // Call backend API to delete the file from the server
     if (uploadKey.value) {
-      const result: DeleteFileResponse = await FileUploadApiService.deleteFile(uploadKey.value, fileToRemove.originalName)
+      const result: DeleteFileResponse = await FileUploadApiService.deleteFile(
+        uploadKey.value,
+        fileToRemove.originalName
+      )
       if (result.success) {
         console.log('✅ File deleted from server successfully')
       } else {
@@ -200,7 +213,9 @@ const removeFile = async (fileToRemove: FileInfo) => {
     }
 
     // Update frontend state
-    uploadedFiles.value = uploadedFiles.value.filter(file => file.originalName !== fileToRemove.originalName)
+    uploadedFiles.value = uploadedFiles.value.filter(
+      file => file.originalName !== fileToRemove.originalName
+    )
 
     // Clear uploadKey to force new plan for new files if no files remain
     if (uploadedFiles.value.length === 0) {
@@ -210,7 +225,6 @@ const removeFile = async (fileToRemove: FileInfo) => {
     }
 
     console.log('🎉 File removal completed, remaining files:', uploadedFiles.value.length)
-
   } catch (error) {
     console.error('❌ Error removing file:', error)
     emit('upload-error', error)
@@ -232,7 +246,7 @@ defineExpose({
   resetSession,
   uploadFiles,
   removeFile,
-  isUploading
+  isUploading,
 })
 </script>
 

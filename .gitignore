@@ -39,7 +39,6 @@ optimized-file-manager-plan.json
 # Node.js dependencies
 node_modules/
 package-lock.json
-pnpm-lock.yaml
 
 # Test case documentation
 docs/test-case/
@@ -52,3 +51,11 @@ h2-data copy/
 extensions/
 .vscode/*
 .cursor/rules/my-custom-rule.mdc
+build-self-contained/*
+src/.DS_Store
+**/.DS_Store
+
+# Python
+.venv/
+.cursor/rules/1.mdc
+application-database-tool.yml

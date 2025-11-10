@@ -15,7 +15,13 @@
  */
 package com.alibaba.cloud.ai.manus.runtime.service;
 
-import com.alibaba.cloud.ai.manus.planning.service.IPlanCreator;
+import java.util.concurrent.CompletableFuture;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.cloud.ai.manus.planning.PlanningFactory;
 import com.alibaba.cloud.ai.manus.planning.service.PlanFinalizer;
 import com.alibaba.cloud.ai.manus.runtime.entity.vo.ExecutionContext;
 import com.alibaba.cloud.ai.manus.runtime.entity.vo.PlanExecutionResult;
@@ -23,14 +29,6 @@ import com.alibaba.cloud.ai.manus.runtime.entity.vo.PlanInterface;
 import com.alibaba.cloud.ai.manus.runtime.executor.PlanExecutorInterface;
 import com.alibaba.cloud.ai.manus.runtime.executor.factory.PlanExecutorFactory;
 import com.alibaba.cloud.ai.manus.workspace.conversation.service.MemoryService;
-import com.alibaba.cloud.ai.manus.planning.PlanningFactory;
-
-import java.util.concurrent.CompletableFuture;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Enhanced Planning Coordinator that uses PlanExecutorFactory to dynamically select the
@@ -41,112 +39,22 @@ public class PlanningCoordinator {
 
 	private static final Logger log = LoggerFactory.getLogger(PlanningCoordinator.class);
 
-	private final PlanningFactory planningFactory;
-
 	private final PlanExecutorFactory planExecutorFactory;
 
 	private final PlanFinalizer planFinalizer;
 
 	private final MemoryService memoryService;
 
-	// TODO shenxun : this should be removed
-	@Autowired
 	public PlanningCoordinator(PlanningFactory planningFactory, PlanExecutorFactory planExecutorFactory,
 			PlanFinalizer planFinalizer, MemoryService memoryService) {
-		this.planningFactory = planningFactory;
 		this.planExecutorFactory = planExecutorFactory;
 		this.planFinalizer = planFinalizer;
 		this.memoryService = memoryService;
 	}
 
 	/**
-	 * Execute plan by user query using plan creator and then execute the created plan
-	 * @param userQuery The user's query/request
-	 * @param rootPlanId The root plan ID for the execution context
-	 * @param parentPlanId The ID of the parent plan (can be null for root plans)
-	 * @param currentPlanId The current plan ID for execution
-	 * @param conversationId The conversation ID for the execution context
-	 * @param toolcallId The ID of the tool call that triggered this plan execution
-	 * @return A CompletableFuture that completes with the execution result
-	 */
-	public CompletableFuture<PlanExecutionResult> executeByUserQuery(String userQuery, String rootPlanId,
-			String parentPlanId, String currentPlanId, String conversationId, String toolcallId) {
-		return executeByUserQuery(userQuery, rootPlanId, parentPlanId, currentPlanId, conversationId, toolcallId,
-				"simple");
-	}
-
-	/**
-	 * Execute plan by user query using plan creator and then execute the created plan
-	 * @param userQuery The user's query/request
-	 * @param rootPlanId The root plan ID for the execution context
-	 * @param parentPlanId The ID of the parent plan (can be null for root plans)
-	 * @param currentPlanId The current plan ID for execution
-	 * @param conversationId The conversation ID for the execution context
-	 * @param toolcallId The ID of the tool call that triggered this plan execution
-	 * @param planType The type of plan to create ("simple" or "dynamic_agent")
-	 * @return A CompletableFuture that completes with the execution result
-	 */
-	public CompletableFuture<PlanExecutionResult> executeByUserQuery(String userQuery, String rootPlanId,
-			String parentPlanId, String currentPlanId, String conversationId, String toolcallId, String planType) {
-		try {
-			log.info("Starting plan execution for user query: {}", userQuery);
-
-			// Log toolcallId if provided
-			if (toolcallId != null) {
-				log.debug("Plan execution triggered by tool call: {}", toolcallId);
-			}
-
-			// Create execution context
-			ExecutionContext context = new ExecutionContext();
-			context.setCurrentPlanId(currentPlanId);
-			context.setRootPlanId(rootPlanId);
-			context.setUserRequest(userQuery);
-			context.setNeedSummary(true);
-			context.setUseConversation(false);
-			context.setConversationId(conversationId);
-			context.setParentPlanId(parentPlanId);
-			context.setToolCallId(toolcallId);
-
-			// Create plan using PlanningFactory with specified plan type
-			IPlanCreator planCreator = planningFactory.createPlanCreator(planType);
-			planCreator.createPlanWithoutMemory(context);
-
-			// Check if plan was created successfully
-			if (context.getPlan() == null) {
-				PlanExecutionResult errorResult = new PlanExecutionResult();
-				errorResult.setSuccess(false);
-				errorResult.setErrorMessage("Plan creation failed, cannot create execution plan");
-				return CompletableFuture.completedFuture(errorResult);
-			}
-
-			// Execute the plan using PlanExecutorFactory
-			PlanExecutorInterface executor = planExecutorFactory.createExecutor(context.getPlan());
-			CompletableFuture<PlanExecutionResult> executionFuture = executor.executeAllStepsAsync(context);
-
-			// Add post-execution processing
-			return executionFuture.thenCompose(result -> {
-				try {
-					PlanExecutionResult processedResult = planFinalizer.handlePostExecution(context, result);
-					return CompletableFuture.completedFuture(processedResult);
-				}
-				catch (Exception e) {
-					log.error("Error during post-execution processing for plan: {}", context.getCurrentPlanId(), e);
-					return CompletableFuture.failedFuture(e);
-				}
-			});
-
-		}
-		catch (Exception e) {
-			log.error("Error during plan execution", e);
-			PlanExecutionResult errorResult = new PlanExecutionResult();
-			errorResult.setSuccess(false);
-			errorResult.setErrorMessage("Plan execution failed: " + e.getMessage());
-			return CompletableFuture.completedFuture(errorResult);
-		}
-	}
-
-	/**
-	 * Execute a plan directly using the provided plan interface
+	 *
+	 * key method Execute a plan directly using the provided plan interface
 	 * @param plan The plan to execute
 	 * @param rootPlanId The root plan ID for the execution context
 	 * @param parentPlanId The ID of the parent plan (can be null for root plans)
@@ -154,12 +62,15 @@ public class PlanningCoordinator {
 	 * @param toolcallId The ID of the tool call that triggered this plan execution
 	 * @param isVueRequest Flag indicating whether this is a Vue frontend request
 	 * @param uploadKey The upload key for file upload context (can be null)
+	 * @param planDepth The depth of the plan in the execution hierarchy (0 for root, 1
+	 * for first level, etc.)
 	 * @return A CompletableFuture that completes with the execution result
 	 */
 	public CompletableFuture<PlanExecutionResult> executeByPlan(PlanInterface plan, String rootPlanId,
-			String parentPlanId, String currentPlanId, String toolcallId, boolean isVueRequest, String uploadKey) {
+			String parentPlanId, String currentPlanId, String toolcallId, boolean isVueRequest, String uploadKey,
+			int planDepth) {
 		try {
-			log.info("Starting direct plan execution for plan: {}", plan.getCurrentPlanId());
+			log.info("Starting direct plan execution for plan: {} at depth: {}", plan.getCurrentPlanId(), planDepth);
 
 			// Create execution context
 			ExecutionContext context = new ExecutionContext();
@@ -171,6 +82,7 @@ public class PlanningCoordinator {
 			context.setCurrentPlanId(currentPlanId);
 			context.setRootPlanId(rootPlanId);
 			context.setPlan(plan);
+			context.setPlanDepth(planDepth); // Set the plan depth
 			if (toolcallId == null && isVueRequest) {
 				context.setNeedSummary(true);
 				log.debug("Setting needSummary=true for planId: {}, toolcallId: {}, isVueRequest: {}", currentPlanId,

@@ -15,11 +15,9 @@
  */
 package com.alibaba.cloud.ai.manus.subplan.initializer;
 
-import com.alibaba.cloud.ai.manus.subplan.model.po.SubplanToolDef;
-import com.alibaba.cloud.ai.manus.subplan.predefineTools.PredefinedSubplanTools;
-import com.alibaba.cloud.ai.manus.subplan.service.ISubplanToolService;
-import com.alibaba.cloud.ai.manus.subplan.templates.SubplanPlanTemplates;
-import com.alibaba.cloud.ai.manus.planning.service.PlanTemplateService;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +25,11 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
+import com.alibaba.cloud.ai.manus.planning.service.PlanTemplateService;
+import com.alibaba.cloud.ai.manus.subplan.model.po.SubplanToolDef;
+import com.alibaba.cloud.ai.manus.subplan.predefineTools.PredefinedSubplanTools;
+import com.alibaba.cloud.ai.manus.subplan.service.SubplanToolService;
+import com.alibaba.cloud.ai.manus.subplan.templates.SubplanPlanTemplates;
 
 /**
  * Initializer for subplan tools and plan templates
@@ -41,7 +42,7 @@ public class SubplanToolInitializer {
 	private static final Logger logger = LoggerFactory.getLogger(SubplanToolInitializer.class);
 
 	@Autowired
-	private ISubplanToolService subplanToolService;
+	private SubplanToolService subplanToolService;
 
 	@Autowired
 	private PlanTemplateService planTemplateService;

@@ -18,8 +18,7 @@ package com.alibaba.cloud.ai.manus.agent;
 import java.util.Map;
 
 import com.alibaba.cloud.ai.manus.config.ManusProperties;
-import com.alibaba.cloud.ai.manus.llm.ILlmService;
-import com.alibaba.cloud.ai.manus.prompt.service.PromptService;
+import com.alibaba.cloud.ai.manus.llm.LlmService;
 import com.alibaba.cloud.ai.manus.recorder.service.PlanExecutionRecorder;
 import com.alibaba.cloud.ai.manus.runtime.entity.vo.ExecutionStep;
 import com.alibaba.cloud.ai.manus.runtime.service.PlanIdDispatcher;
@@ -38,11 +37,10 @@ public abstract class ReActAgent extends BaseAgent {
 	 * @param manusProperties Manus configuration properties
 	 */
 
-	public ReActAgent(ILlmService llmService, PlanExecutionRecorder planExecutionRecorder,
-			ManusProperties manusProperties, Map<String, Object> initialAgentSetting, PromptService promptService,
-			ExecutionStep step, PlanIdDispatcher planIdDispatcher) {
-		super(llmService, planExecutionRecorder, manusProperties, initialAgentSetting, promptService, step,
-				planIdDispatcher);
+	public ReActAgent(LlmService llmService, PlanExecutionRecorder planExecutionRecorder,
+			ManusProperties manusProperties, Map<String, Object> initialAgentSetting, ExecutionStep step,
+			PlanIdDispatcher planIdDispatcher) {
+		super(llmService, planExecutionRecorder, manusProperties, initialAgentSetting, step, planIdDispatcher);
 	}
 
 	/**
@@ -79,15 +77,20 @@ public abstract class ReActAgent extends BaseAgent {
 	 */
 	@Override
 	public AgentExecResult step() {
+		try {
+			boolean shouldAct = think();
+			if (!shouldAct) {
+				AgentExecResult result = new AgentExecResult("Thinking complete - no action needed",
+						AgentState.IN_PROGRESS);
 
-		boolean shouldAct = think();
-		if (!shouldAct) {
-			AgentExecResult result = new AgentExecResult("Thinking complete - no action needed",
-					AgentState.IN_PROGRESS);
-
-			return result;
+				return result;
+			}
+			return act();
 		}
-		return act();
+		catch (com.alibaba.cloud.ai.manus.runtime.service.TaskInterruptionCheckerService.TaskInterruptedException e) {
+			// Agent was interrupted, return INTERRUPTED state to stop execution
+			return new AgentExecResult("Agent execution interrupted: " + e.getMessage(), AgentState.INTERRUPTED);
+		}
 	}
 
 }

@@ -26,8 +26,10 @@ const words: I18nType = {
   init: {
     welcome: 'Welcome to JManus',
     welcomeStep: 'Welcome to JManus',
-    description: 'To get started, you need to configure an LLM service to enable AI features. You can choose Alibaba Cloud DashScope or configure any OpenAI-compatible API service.',
-    languageStepDescription: 'Please select your language preference, which will be used as the default interface language.',
+    description:
+      'To get started, you need to configure an LLM service to enable AI features. You can choose Alibaba Cloud DashScope or configure any OpenAI-compatible API service.',
+    languageStepDescription:
+      'Please select your language preference, which will be used as the default interface language.',
     stepLanguage: 'Language',
     stepModel: 'Model Setup',
     selectLanguageLabel: 'Select Language',
@@ -35,7 +37,8 @@ const words: I18nType = {
     back: 'Back',
     configModeLabel: 'Configuration Mode',
     dashscopeMode: 'Alibaba Cloud DashScope (Recommended)',
-    dashscopeModeDesc: 'Use Alibaba Cloud DashScope service, just provide API key to get started quickly',
+    dashscopeModeDesc:
+      'Use Alibaba Cloud DashScope service, just provide API key to get started quickly',
     customMode: 'Custom OpenAI Compatible Service',
     customModeDesc: 'Configure any OpenAI API compatible service, such as Ollama, LocalAI, etc.',
     apiKeyLabel: 'DashScope API Key',
@@ -62,10 +65,12 @@ const words: I18nType = {
     saveFailed: 'Failed to save configuration',
     networkError: 'Network error, please check your internet connection',
     successMessage: 'Configuration saved successfully! Redirecting to home page...',
-    restartRequired: 'API key saved successfully! The application needs to be restarted for the configuration to take effect.\n\nClick "OK" to restart now, or "Cancel" to restart manually later.',
+    restartRequired:
+      'API key saved successfully! The application needs to be restarted for the configuration to take effect.\n\nClick "OK" to restart now, or "Cancel" to restart manually later.',
     simplifiedChinese: 'Simplified Chinese',
     completionsPath: 'Completions Path',
-    completionsPathPlaceholder: 'If not specified, the default configuration is: /v1/chat/completions',
+    completionsPathPlaceholder:
+      'If not specified, the default configuration is: /v1/chat/completions',
   },
 
   // Common buttons and actions
@@ -87,6 +92,7 @@ const words: I18nType = {
     search: 'Search',
     loading: 'Loading...',
     parameters: 'Parameters',
+    success: 'Success',
   },
 
   // File Browser
@@ -106,10 +112,13 @@ const words: I18nType = {
     copyPath: 'Copy Path',
     noPlanSelected: 'No plan selected. Please execute a task to view files.',
     noFilesYet: 'No Files Generated Yet',
-    waitingForFiles: 'The AI model is still processing your request. Files will appear here once they are generated.',
-    filesTip: 'Generated files like analysis results, reports, and data exports will be displayed in this file browser.',
+    waitingForFiles:
+      'The AI model is still processing your request. Files will appear here once they are generated.',
+    filesTip:
+      'Generated files like analysis results, reports, and data exports will be displayed in this file browser.',
     noPlanExecuting: 'No task is currently being executed.',
-    startTaskTip: 'Please start a task in the chat panel on the left. Generated files will be displayed here.',
+    startTaskTip:
+      'Please start a task in the chat panel on the left. Generated files will be displayed here.',
     waitingForGeneration: 'Waiting for File Generation',
     planExecuting: 'The AI model is currently executing the plan and generating files.',
     checking: 'Checking...',
@@ -192,7 +201,7 @@ const words: I18nType = {
       agent: 'Agent Configuration',
       model: 'Model Configuration',
       mcp: 'Tools/MCP Configuration',
-      prompt: 'Dynamic Prompt Configuration',
+      database: 'Database Configuration',
       namespace: 'Namespace Configuration',
     },
     subGroupDisplayNames: {
@@ -206,51 +215,7 @@ const words: I18nType = {
       infiniteContext: 'Infinite Context',
       filesystem: 'File System',
       mcpServiceLoader: 'MCP Service Loader',
-    },
-    // Agent configuration page
-    agentConfig: {
-      title: 'Agent Configuration',
-      import: 'Import',
-      export: 'Export',
-      configuredAgents: 'Configured Agents',
-      agentCount: 'agents',
-      noAgent: 'No agent configuration',
-      createNew: 'Create New Agent',
-      selectAgentHint: 'Please select an agent to configure',
-      newAgent: 'New Agent',
-      agentName: 'Agent Name',
-      agentNamePlaceholder: 'Enter agent name',
-      description: 'Description',
-      descriptionPlaceholder: 'Describe the function and purpose of this agent',
-      nextStepPrompt: 'Agent Prompt (personality, requirements, and next step guidance)',
-      nextStepPromptPlaceholder:
-        "Set the agent's personality, requirements, and next step guidance...",
-      toolConfiguration: 'Tool Configuration',
-      assignedTools: 'Assigned Tools',
-      noAssignedTools: 'No assigned tools',
-      addRemoveTools: 'Add/Remove Tools',
-      deleteConfirm: 'Delete Confirmation',
-      deleteConfirmText: 'Are you sure you want to delete',
-      deleteWarning: 'This operation cannot be undone.',
-      requiredFields: 'Please fill in the required fields',
-      createSuccess: 'Agent created successfully',
-      createFailed: 'Failed to create agent',
-      saveSuccess: 'Agent saved successfully',
-      saveFailed: 'Failed to save agent',
-      deleteSuccess: 'Agent deleted successfully',
-      deleteFailed: 'Failed to delete agent',
-      importSuccess: 'Agent imported successfully',
-      importFailed: 'Failed to import agent',
-      exportSuccess: 'Agent exported successfully',
-      exportFailed: 'Failed to export agent',
-      loadDataFailed: 'Failed to load data',
-      loadDetailsFailed: 'Failed to load agent details',
-      invalidFormat: 'Invalid agent configuration format: missing required fields',
-      modelConfiguration: 'Model Configuration',
-      modelConfigurationLabel: 'Select Model',
-      cannotDeleteBuiltIn: 'Cannot delete built-in agent',
-      builtInAgents: 'Built-in Agents',
-      customAgents: 'Custom Agents',
+      imageRecognition: 'Image Recognition',
     },
     // Model configuration page
     modelConfig: {
@@ -312,9 +277,19 @@ const words: I18nType = {
       topP: 'Top P',
       topPPlaceholder: 'Leave empty to use model default',
       completionsPath: 'Completions Path',
-      completionsPathPlaceholder: 'If not specified, the default configuration is: /v1/chat/completions',
+      completionsPathPlaceholder:
+        'If not specified, the default configuration is: /v1/chat/completions',
       headers: 'Headers',
       headersPlaceholder: 'Request headers (JSON format)',
+      selectDefaultModel: 'Verify SK and Fetch Models',
+      defaultModel: 'Default Model',
+      apiKeySecurityNotice:
+        'For security reasons, the API key cannot be sent to the frontend. Please re-enter the API key each time, then click the button to confirm and fetch models.',
+      apiKeyInstructions:
+        'For security reasons, the SK cannot be sent to the frontend. If you want to modify the default model, please follow these steps:',
+      apiKeyStep1: '1) Re-enter the API Key (SK)',
+      apiKeyStep2: '2) Click to verify SK and fetch model list',
+      apiKeyStep3: '3) Select model',
     },
     // MCP configuration page
     mcpConfig: {
@@ -347,25 +322,32 @@ const words: I18nType = {
       jsonStatusEmpty: 'Please enter JSON configuration',
       jsonStatusValid: 'JSON format is valid',
       jsonStatusInvalid: 'JSON format is invalid',
-      missingMcpServers: '❌ Missing mcpServers property - Please ensure JSON contains mcpServers object',
-      invalidServerConfig: '❌ Invalid server configuration: {serverId} - Server config must be an object',
-      invalidArgs: '❌ args field must be an array: {serverId} - Please change args to array format',
+      missingMcpServers:
+        '❌ Missing mcpServers property - Please ensure JSON contains mcpServers object',
+      invalidServerConfig:
+        '❌ Invalid server configuration: {serverId} - Server config must be an object',
+      invalidArgs:
+        '❌ args field must be an array: {serverId} - Please change args to array format',
       invalidEnv: '❌ env field must be an object: {serverId} - Please change env to object format',
-      invalidArgsType: '❌ args array elements must be strings: {serverId}, index: {index} - Please ensure all arguments are strings',
-      invalidEnvType: '❌ env object values must be strings: {serverId}, key: {key} - Environment variable values must be strings',
+      invalidArgsType:
+        '❌ args array elements must be strings: {serverId}, index: {index} - Please ensure all arguments are strings',
+      invalidEnvType:
+        '❌ env object values must be strings: {serverId}, key: {key} - Environment variable values must be strings',
       missingUrl: '❌ Missing url field: {serverId} - Must have url when no command is present',
       invalidUrl: '❌ Invalid url format: {serverId} - Please check if URL format is correct',
       studioExample:
         'Please enter MCP server configuration JSON.\n\nExample:\n{\n  "mcpServers": {\n    "github": {\n      "command": "npx",\n      "args": [\n        "-y",\n        "@modelcontextprotocol/server-github"\n      ],\n      "env": {\n        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"\n      }\n    }\n  }\n}',
       sseExample:
         'Please enter SSE MCP server configuration JSON.\n\nExample:\n{\n  "mcpServers": {\n    "remote-server": {\n      "url": "https://example.com/mcp",\n      "headers": {\n        "Authorization": "Bearer <YOUR_TOKEN>"\n      }\n    }\n  }\n}',
-      selectServerHint: 'Please select an MCP server on the left or click to create a new MCP configuration',
+      selectServerHint:
+        'Please select an MCP server on the left or click to create a new MCP configuration',
       jsonEditor: 'JSON Editor',
       jsonConfigEmpty: 'JSON configuration cannot be empty',
       jsonFormatError: 'JSON format error',
       jsonConfigSaved: 'JSON configuration saved',
       confirmDelete: 'Confirm Delete',
-      deleteConfirmMessage: 'Are you sure you want to delete this MCP server configuration? This action cannot be undone.',
+      deleteConfirmMessage:
+        'Are you sure you want to delete this MCP server configuration? This action cannot be undone.',
       deleteWarningText: 'This action cannot be undone. Please proceed with caution.',
       noServerSelected: 'No MCP server selected',
       updateSuccess: 'Updated successfully',
@@ -380,15 +362,21 @@ const words: I18nType = {
       mcpName: 'MCP Name',
       usageInstructions: 'Usage Instructions',
       getMcpServiceList: 'Get MCP Service List',
-      findMcpServices: 'You can find available MCP services on mcp.higress.ai, mcp.so, modelscope.cn',
-      batchImportTip: 'If you need to batch configure MCP services, you can use the import all function in the top right corner',
+      findMcpServices:
+        'You can find available MCP services on mcp.higress.ai, mcp.so, modelscope.cn',
+      batchImportTip:
+        'If you need to batch configure MCP services, you can use the import all function in the top right corner',
       configureMcpService: 'Configure MCP Service',
       fillServiceName: 'Fill in service name',
-      selectConnectionType: 'Select connection type: choose STUDIO for local and input Command, Args and Env. Choose SSE or STREAMING for remote and input URL',
-      clickSaveToComplete: 'Click save button to complete MCP configuration, MCP tools will be automatically registered to the system',
+      selectConnectionType:
+        'Select connection type: choose STUDIO for local and input Command, Args and Env. Choose SSE or STREAMING for remote and input URL',
+      clickSaveToComplete:
+        'Click save button to complete MCP configuration, MCP tools will be automatically registered to the system',
       configureAgentUsage: 'Configure Agent Usage',
-      createAgentTip: 'Create a new Agent on the Agent configuration page, add the just configured MCP service to the Agent, this can reduce tool conflicts and improve Agent tool selection accuracy',
-      copyJsonConfig: 'Copy the complete JSON configuration to the input box above (you can refer to configuration examples), then click import',
+      createAgentTip:
+        'Create a new Agent on the Agent configuration page, add the just configured MCP service to the Agent, this can reduce tool conflicts and improve Agent tool selection accuracy',
+      copyJsonConfig:
+        'Copy the complete JSON configuration to the input box above (you can refer to configuration examples), then click import',
       command: 'Command',
       args: 'Args',
       env: 'Env',
@@ -405,24 +393,61 @@ const words: I18nType = {
       missingUrlField: 'Missing url field: {serverId} - must have url or baseUrl when no command',
       urlFieldTip: '💡 Please provide url or baseUrl field',
       serverConfigWarning: 'Server {serverId} has no command but also no url or baseUrl',
-      jsonSyntaxError: '❌ JSON syntax error - please check brackets, commas, quotes and other symbols',
+      jsonSyntaxError:
+        '❌ JSON syntax error - please check brackets, commas, quotes and other symbols',
       jsonIncomplete: '❌ JSON incomplete - please check if ending brackets or quotes are missing',
       jsonNumberError: '❌ JSON number format error - please check number format',
       jsonStringError: '❌ JSON string format error - please check if quotes are paired',
       jsonSyntaxErrorWithMessage: '❌ JSON syntax error: {message}',
-      correctFormatExample: '💡 Correct format example: {"mcpServers": {"server-id": {"name": "Server Name", "url": "Server URL"}}}',
+      correctFormatExample:
+        '💡 Correct format example: {"mcpServers": {"server-id": {"name": "Server Name", "url": "Server URL"}}}',
       commandPlaceholder: 'e.g.: uvx',
       urlPlaceholder: 'e.g.: https://mcp.example.com/server',
       argsPlaceholder: 'One parameter per line, e.g.:\n--from\nmysql_mcp_server_pro\n--mode\nstdio',
-      envPlaceholder: 'Key-value format, one per line, e.g.:\nMYSQL_HOST:127.0.0.1\nMYSQL_PORT:3306\nMYSQL_USER:root',
+      envPlaceholder:
+        'Key-value format, one per line, e.g.:\nMYSQL_HOST:127.0.0.1\nMYSQL_PORT:3306\nMYSQL_USER:root',
       connectionTypePlaceholder: 'Please select connection type',
       argsFormatError: 'Args format error, please enter a valid JSON array',
       envFormatError: 'Env format error, please enter a valid JSON object',
-      argsStringError: 'Args format error, each parameter must be a string',
-      envStringError: 'Env format error, each value must be a string',
-      importSuccess: 'Import successful',
-      importFailed: 'Import failed',
-      importInvalidJson: 'Imported JSON is invalid',
+    },
+    // Database configuration page
+    databaseConfig: {
+      title: 'Database Configuration',
+      description:
+        'This configuration page is used to configure databases that can be operated by database tools (database_metadata_use, database_read_use, database_write_use).\n\nAfter configuring the database, you can use the three core methods above to perform CRUD operations on the database, which can conveniently store some intermediate data that needs to be shared during agent execution.',
+      configList: 'Configuration List',
+      noConfigs: 'No database configurations available',
+      newConfig: 'New Configuration',
+      selectOrCreate: 'Please select a configuration or create a new one',
+      search: 'Search configurations...',
+      enabled: 'Enabled',
+      disabled: 'Disabled',
+      save: 'Save',
+      delete: 'Delete',
+      create: 'Create',
+      cancel: 'Cancel',
+      name: 'Name',
+      namePlaceholder: 'Enter datasource name',
+      type: 'Type',
+      selectType: 'Select database type',
+      enable: 'Enable',
+      url: 'URL',
+      urlPlaceholder: 'e.g.: jdbc:mysql://localhost:3306/dbname',
+      driverClassName: 'Driver Class Name',
+      driverClassNamePlaceholder: 'e.g.: com.mysql.cj.jdbc.Driver',
+      driverClassNameHint: 'Auto-filled based on database type',
+      testConnection: 'Test Connection',
+      testing: 'Testing...',
+      username: 'Username',
+      usernamePlaceholder: 'Enter database username',
+      password: 'Password',
+      passwordPlaceholder: 'Enter database password',
+      passwordSetHint:
+        'Password has been set. For security reasons, the password is only stored on the backend. If you need to update the connection, please re-enter the password.',
+      passwordNotSetHint: 'Password has not been set. Please set a password.',
+      deleteConfirm: 'Delete Confirmation',
+      deleteMessage:
+        'Are you sure you want to delete the configuration "{name}"? This action cannot be undone.',
     },
     // Basic configuration
     basicConfig: {
@@ -445,16 +470,12 @@ const words: I18nType = {
         maxMemory: 'Maximum number of messages that can be remembered',
         parallelToolCalls: 'Parallel tool calls',
       },
-      agents: {
-        forceOverrideFromYaml:
-          'Force override of agents with the same name using the YAML configuration file',
-      },
-      infiniteContext: {
-        enabled: 'Whether to enable infinite context',
-        parallelThreads: 'Number of parallel processing threads',
-        taskContextSize:
-          'Character count threshold for triggering infinite context (number of characters)',
-      },
+      // infiniteContext: { // TEMPORARILY COMMENTED OUT
+      //   enabled: 'Whether to enable infinite context',
+      //   parallelThreads: 'Number of parallel processing threads',
+      //   taskContextSize:
+      //     'Character count threshold for triggering infinite context (number of characters)',
+      // },
       fileSystem: {
         allowExternalAccess: 'Whether to allow file operations beyond the working directory',
       },
@@ -462,6 +483,13 @@ const words: I18nType = {
         connectionTimeoutSeconds: 'MCP connection timeout (seconds)',
         maxRetryCount: 'MCP connection max retry count',
         maxConcurrentConnections: 'MCP max concurrent connections',
+      },
+      imageRecognition: {
+        poolSize: 'Thread Pool Size',
+        modelName: 'Model Name',
+        dpi: 'DPI',
+        imageType: 'Image Type',
+        maxRetryAttempts: 'Max Retry Attempts',
       },
       systemSettings: {
         systemName: 'System Name',
@@ -501,52 +529,10 @@ const words: I18nType = {
         performance: 'Performance',
       },
       restoreAllDefaults: 'Restore to Default',
-      restoreAllDefaultsConfirm: 'Are you sure you want to restore all configurations to default values? This will overwrite all custom configurations.',
+      restoreAllDefaultsConfirm:
+        'Are you sure you want to restore all configurations to default values? This will overwrite all custom configurations.',
       restoreAllDefaultsSuccess: 'All configurations have been restored to default values',
       restoreAllDefaultsFailed: 'Failed to restore default configurations',
-    },
-    promptConfig: {
-      title: 'Dynamic Prompt Configuration',
-      configuredprompts: 'Configured Prompts',
-      loadDetailsFailed: 'Failed to load prompt details',
-      promptCount: 'prompt(s)',
-      noPrompts: 'No prompts configured',
-      createNew: 'Create New Prompt',
-      promptName: 'Prompt Name',
-      placeholder: 'Please enter',
-      promptContent: 'Prompt Content',
-      messageType: 'Message Type',
-      type: 'Category Type',
-      builtIn: 'Built-in',
-      custom: 'Custom',
-      namespace: 'Namespace',
-      promptNamePlaceholder: 'Enter prompt name',
-      selectPromptHint: 'Please select a prompt to configure',
-      promptContentPlaceholder: 'Enter prompt content',
-      descriptionPlaceholder: 'Describe the function and purpose of this prompt',
-      description: 'Description',
-      requiredFields: 'Please fill in all required fields',
-      newPrompt: 'New Dynamic Prompt',
-      saveSuccess: 'Prompt saved successfully',
-      saveFailed: 'Failed to save prompt',
-      deleteSuccess: 'Prompt deleted successfully',
-      deleteFailed: 'Failed to delete prompt',
-      deleteConfirm: 'Delete Confirmation',
-      deleteConfirmText: 'Are you sure you want to delete',
-      deleteWarning: 'This action cannot be undone.',
-      exportSuccess: 'Configuration exported successfully',
-      exportFailed: 'Failed to export configuration',
-      importSuccess: 'Configuration imported successfully',
-      importFailed: 'Failed to import configuration',
-      resetToLanguageDefault: 'Reset to Language Default',
-      selectLanguage: 'Select Language',
-      resetToLanguageDefaultSuccess: 'Reset to language default successfully',
-      resetToLanguageDefaultFailed: 'Failed to reset to language default',
-      resetLanguageWarning: 'This will overwrite current content with the default version of selected language',
-      batchSwitchLanguage: 'Batch Switch Language',
-      batchSwitchLanguageSuccess: 'Batch language switch successful',
-      batchSwitchLanguageFailed: 'Failed to batch switch language',
-      batchSwitchLanguageWarning: 'This will overwrite all prompt content and descriptions with the default version of selected language',
     },
     namespaceConfig: {
       title: 'Namespace Configuration',
@@ -602,7 +588,8 @@ const words: I18nType = {
       title: 'Agent Multi-Language Management',
       resetAll: 'Reset All Agents',
       resetAllConfirm: 'Reset All Agents Confirmation',
-      resetAllWarning: 'This operation will delete all existing agent configurations and reload the specified language version. This action cannot be undone!',
+      resetAllWarning:
+        'This operation will delete all existing agent configurations and reload the specified language version. This action cannot be undone!',
       selectLanguage: 'Select Language',
       resetSuccess: 'All agents have been reset to the specified language version',
       resetFailed: 'Failed to reset agents',
@@ -674,7 +661,6 @@ const words: I18nType = {
     promptPlaceholder: 'Describe the plan you want to generate...',
     generating: 'Generating...',
     generate: 'Generate Plan',
-    updatePlan: 'Update Plan',
     executing: 'Executing...',
     execute: 'Execute Plan',
     executionParams: 'Execution Parameters',
@@ -761,14 +747,18 @@ const words: I18nType = {
     errorMessage: 'Error Message',
     triggeredByTool: 'Triggered by Tool',
     planExecution: 'Plan Execution',
-    userInputRequired: 'User Input Required'
+    userInputRequired: 'User Input Required',
   },
 
   // Input component
   input: {
     placeholder: 'Send a message to JManus',
     send: 'Send',
-    planMode: 'PLAN-ACT Template Mode',
+    stop: 'Stop',
+    planMode: 'Func-Agent Mode',
+    selectionTitle: 'Select Option',
+    selectPlaceholder: 'Please select',
+    defaultFuncAgent: 'Use Default FuncAgent to Process Conversation',
     waiting: 'Waiting for user input...',
     maxLength: 'Max Length',
     charactersRemaining: 'Characters Remaining',
@@ -788,17 +778,17 @@ const words: I18nType = {
 
   // Sidebar
   sidebar: {
-    title: 'PLAN-ACT Template Name',
+    title: 'Func-Agent Template Name',
     templateList: 'Template List',
     configuration: 'Configuration',
-    newPlan: 'New Plan',
+    newPlan: 'New Func-Agent Plan',
     loading: 'Loading...',
     retry: 'Retry',
     noTemplates: 'No available plan templates',
     unnamedPlan: 'Unnamed Plan',
     noDescription: 'No description',
     deleteTemplate: 'Delete this plan template',
-  jsonTemplate: 'plan-act计划模板编辑器',
+    jsonTemplate: 'Func-Agent Plan Template Editor',
     rollback: 'Rollback',
     restore: 'Restore',
     jsonPlaceholder:
@@ -807,8 +797,6 @@ const words: I18nType = {
     generatorPlaceholder:
       'Step 1: Enter the task you want to accomplish here in natural language, as detailed as possible. Then click Generate Plan to create a precise, repeatable plan.',
     generating: 'Generating...',
-    generatePlan: 'Generate Plan',
-    updatePlan: 'Update Plan',
     executionController: 'Execution Controller',
     executionParams: 'Execution Parameters',
     executionParamsPlaceholder: 'Enter execution parameters...',
@@ -816,7 +804,8 @@ const words: I18nType = {
       'When executing repeatedly, you can set some content in Step 2 as variables, then specify the specific values for those variables here. For example, set "Variable1" in the JSON, then set "Variable1=Alibaba" here to achieve function parameter-like effects.',
     clearParams: 'Clear Parameters',
     parameterRequirements: 'Parameter Requirements',
-    parameterRequirementsHelp: 'You can embed variable parameters in the "task requirements section" using <<parameter_name>> format. After saving, these variable parameters can be used in the subsequent service publishing.',
+    parameterRequirementsHelp:
+      'You can embed variable parameters in the "task requirements section" using <<parameter_name>> format. After saving, these variable parameters can be used in the subsequent service publishing.',
     clearAllParams: 'Clear All Parameters',
     noParametersRequired: 'This plan template does not require any parameters',
     fillAllRequiredParameters: 'Please fill in all required parameters',
@@ -826,29 +815,48 @@ const words: I18nType = {
     executePlan: 'Execute Plan',
     publishMcpService: 'Publish as Tool Service',
     updateServiceStatus: 'Update Service Status',
-    
+
     // Execution Controller - Call Examples
     internalCall: 'Internal Call',
-    internalCallDescription: 'You have published this plan-act as an internal method. You can find this tool\'s method in the agent configuration\'s add tools section and add and use it.',
+    internalCallDescription:
+      "You have published this Func-Agent as an internal method. You can find this tool's method in the agent configuration's add tools section and add and use it.",
     internalMethodCall: 'Internal Method Call',
     toolName: 'Tool Name',
+    publishedTool: 'Published Tool',
     serviceGroup: 'Service Group',
-    internalCallUsage: 'After adding this tool in agent configuration, you can directly call this method in the agent',
-    internalCallExample: 'In the agent configuration\'s "Add Tools" section, search and add this tool, then call it directly in the agent',
-    
+    organizationMethod: 'Organization',
+    organizationLabel: 'Organization:',
+    organizationByTime: 'By Modify Time',
+    organizationByAbc: 'By ABC',
+    organizationByGroupTime: 'By Service Group & Time',
+    organizationByGroupAbc: 'By Service Group & ABC',
+    ungroupedMethods: 'Ungrouped Methods',
+    collapseGroup: 'Collapse Group',
+    expandGroup: 'Expand Group',
+    searchLabel: 'Search:',
+    searchPlaceholder: 'Search plans...',
+    clearSearch: 'Clear search',
+    internalCallUsage:
+      'After adding this tool in agent configuration, you can directly call this method in the agent',
+    internalCallExample:
+      'In the agent configuration\'s "Add Tools" section, search and add this tool, then call it directly in the agent',
+
     httpCallExample: 'HTTP Call Example',
-    httpCallDescription: 'You have published this plan-act as an HTTP service. You can call it according to the example below.',
+    httpCallDescription:
+      'You have published this Func-Agent as an HTTP service. You can call it according to the example below.',
     httpServiceCall: 'HTTP Service Call',
     httpEndpoint: 'HTTP Endpoint',
     httpCallUsage: 'Call through HTTP POST interface',
-    
+
     mcpCall: 'MCP Call',
-    mcpCallDescription: 'You have published this plan-act as an MCP service. You can use it through MCP streamable or SSE methods.',
+    mcpCallDescription:
+      'You have published this Func-Agent as an MCP service. You can use it through MCP streamable or SSE methods.',
     mcpServiceCall: 'MCP Service Call',
     mcpEndpoint: 'MCP Endpoint',
     mcpCallUsage: 'Call through MCP protocol using streaming or SSE methods',
-    mcpCallExample: 'Connect to this service through MCP client, using streamable or SSE methods for calling',
-    
+    mcpCallExample:
+      'Connect to this service through MCP client, using streamable or SSE methods for calling',
+
     usage: 'Usage',
     example: 'Example',
     enterValueFor: 'Enter value for {param}',
@@ -880,6 +888,11 @@ const words: I18nType = {
     saveSuccess: 'Save successful: {message}\n\nCurrent version count: {versionCount}',
     saveStatus: 'Save status: {message}',
     saveFailed: 'Failed to save plan modifications',
+    saving: 'Saving...',
+    saveConfirmationTitle: 'Save Confirmation',
+    saveConfirmationMessage:
+      'Task requirements have been modified but not saved. Do you want to save the modifications before executing the plan?',
+    continueWithoutSave: 'Continue Without Saving',
     generateSuccess: 'Plan generated successfully! Template ID: {templateId}',
     generateFailed: 'Failed to generate plan',
     updateSuccess: 'Plan updated successfully!',
@@ -892,16 +905,21 @@ const words: I18nType = {
     defaultExecutionPlanTitle: 'Execution Plan',
 
     // JsonEditor related
-  planId: 'Plan Template ID',
+    planId: 'Plan Template ID',
     steps: 'Steps',
-  tasks: '任务列表',
+    tasks: '任务列表',
     subtask: 'Subtask',
     agent: 'Agent',
     selectAgent: 'Select Agent',
-  stepRequirement: 'Task Requirement',
-  stepRequirementPlaceholder: 'Please enter the specific requirements and description for this task...',
-  terminateColumns: 'Task Output Requirements Description',
-  terminateColumnsPlaceholder: 'Specify structured return values. If specified, returns a JSON list where each row contains your specified columns. For example: col1,col2 will output [(col1:val1,col2:val2), (col1:val3,col2:val4)]',
+    stepRequirement: 'Task Requirement',
+    stepRequirementPlaceholder:
+      'Please enter the specific requirements and description for this task...',
+    terminateColumns: 'Task Output Requirements Description',
+    terminateColumnsPlaceholder:
+      'Specify structured return values. If specified, returns a JSON list where each row contains your specified columns. For example: col1,col2 will output [(col1:val1,col2:val2), (col1:val3,col2:val4)]',
+    preview: 'Preview',
+    systemWillReturnListWithTableHeaderFormat:
+      'System will return a multi-row list in JSON format with table header',
     titlePlaceholder: 'Please enter plan title...',
     moveUp: 'Move Up',
     moveDown: 'Move Down',
@@ -916,30 +934,34 @@ const words: I18nType = {
     agentLoadError: 'Failed to load agents',
     retryLoadAgents: 'Retry loading agents',
     availableTools: 'Available Tools',
-    
+
     // Plan Type Selection
     planType: 'Plan Type',
     simplePlan: 'Simple Plan',
     advancedPlan: 'Advanced Plan (MapReduce)',
     dynamicAgentPlan: 'Dynamic Agent Plan',
-    dynamicAgentInstruction: 'Use dynamic agent planning, just input instructions directly without going through the generation process. Please build your plan directly in the dynamic agent planning section.',
-    
+    dynamicAgentInstruction:
+      'Use dynamic agent planning, just input instructions directly without going through the generation process. Please build your plan directly in the dynamic agent planning section.',
+
     // Tool Selection
     selectedTools: 'Selected Tools',
     addTools: 'Add Tools',
     removeTool: 'Remove Tool',
-  clearAllTools: 'Clear All Tools',
-  noToolsSelected: 'No tools selected',
-  planTypeError: 'Plan Type Error',
-  
-  // Model and Tool Keys
-  modelName: 'Model Name',
-  modelNameDescription: 'Specify model name for handling specific tasks (such as image recognition, etc.). If not specified, the default model will be used.',
-  noModelSelected: 'Empty',
-  noTools: 'No tools selected. The model will autonomously select appropriate tools from all registered tools (including MCP tools) to perform tasks. For more precise results, please help the model select specific tools, which will provide better performance.',
-  addTool: 'Add Tool',
-  toolPlaceholder: 'Enter tool',
-  addRemoveTools: 'Add/Remove Tools',
+    clearAllTools: 'Clear All Tools',
+    noToolsSelected: 'No tools selected',
+    planTypeError: 'Plan Type Error',
+
+    // Model and Tool Keys
+    modelName: 'Model Name',
+    modelNameDescription:
+      'Specify model name for handling specific tasks (such as image recognition, etc.). If not specified, the default model will be used.',
+    noModelSelected: 'Empty',
+    noModelsFound: 'No models found',
+    noTools:
+      'No tools selected. The model will autonomously select appropriate tools from all registered tools (including MCP tools) to perform tasks. For more precise results, please help the model select specific tools, which will provide better performance.',
+    addTool: 'Add Tool',
+    toolPlaceholder: 'Enter tool',
+    addRemoveTools: 'Add/Remove Tools',
 
     // Common error messages
     loadingFailed: 'Loading failed',
@@ -957,7 +979,7 @@ const words: I18nType = {
     sortByStatus: 'Sort by Status',
     summary: '{groups} service groups, {tools} tools ({selected} selected)',
     enableAll: 'Enable All',
-    noToolsFound: 'No tools found'
+    noToolsFound: 'No tools found',
   },
 
   // Direct execution page
@@ -1073,45 +1095,37 @@ const words: I18nType = {
       stockPrice: {
         title: 'Query Stock Price',
         description: "Get today's latest stock price for Alphabet (Agent can use browser tools)",
-        prompt:
-          "Use browser based on Google to query today's Alphabet stock price and return the latest stock price\n",
+        url: 'https://github.com/talk-flow/public-usecase/blob/main/eng/stock-price-query.md',
       },
       weather: {
-        title: 'Query Weather',
-        description: "Get today's weather in New York (Agent can use MCP tool services)",
-        prompt: "Use browser, based on Google, to query today's weather in New York",
+        title: 'IP Query',
+        description:
+          'Query geographic location and related information for specified IP addresses (Agent can use MCP tool services)',
+        url: 'https://github.com/talk-flow/public-usecase/blob/main/eng/ip-query.md',
       },
       queryplan: {
-        title: 'Query Person Info',
-        description: "Query all information about Shenxun Ali (to demonstrate infinite context capability)",
-        prompt: 'Use browser, based on Baidu, to query person info',
-        planTitle: 'Query all information about Shenxun Ali (to demonstrate infinite context capability)',
-        step1: '[BROWSER_AGENT] Search for Shenxun Ali through Baidu, get the first page HTML data, merge and aggregate to html_data directory',
-        step1Output: 'Storage directory path',
-        step2: '[TEXT_FILE_AGENT] Find all valid web links about Shenxun Ali from html_data directory, output to link.md',
-        step2Output: 'URL address, description',
+        title: 'Enhanced Research Search',
+        description:
+          'Search engines, download and read multiple pages, summarize key information (demonstrates functional calls)',
+        url: 'https://github.com/talk-flow/public-usecase/blob/main/eng/query-plan.md',
       },
       ainovel: {
         title: 'AI Novel Creation',
-        description: 'AI gradually defeats humanity themed novel (to demonstrate long-form content output)',
-        prompt: 'Create a novel about artificial intelligence gradually defeating humanity, including 10 chapters',
-        planTitle: 'AI Gradually Defeats Humans Novel Creation Plan',
-        step1: '[TEXT_FILE_AGENT] Create a file with novel title and chapter titles, expecting a novel with 10 chapters, output outline to novel.md, each chapter uses secondary title, only write chapter titles in current step, novel title is "AI Gradually Defeats Humans"',
-        step1Output: 'File name',
-        step2: '[TEXT_FILE_AGENT] Get chapter title information from novel.md file, then improve each chapter content in sequence, only improve one chapter content per round, use replace to update content, each chapter requires 3000 words, do not query all document content after updating each chapter',
-        step2Output: 'File name',
+        description:
+          'AI gradually defeats humanity themed novel (to demonstrate long-form content output)',
+        url: 'https://github.com/talk-flow/public-usecase/blob/main/eng/ai-novel.md',
       },
       formInputDemo: {
         title: 'AI Intelligent Dynamic Form Demo',
-        description: 'Experience AI intelligent analysis of user needs and dynamic generation of relevant form fields',
-        prompt: 'Demonstrate how AI intelligently generates targeted form fields based on user questions',
-        planTitle: 'AI Intelligent Dynamic Form Demo Plan',
-        step1: '[INTELLIGENT_FORM_AGENT] Ask user to input consultation type, there are three types: business consultation, technical consultation, and architecture consultation',
-        step1Output: 'Business type',
-        step2: '[DEFAULT_AGENT] If technical consultation, output: Technical consultation please call 10086\n' + 'If architecture consultation, output: Architecture consultation please contact Shenxun\n' + 'Otherwise output empty, not within my scope',
-        step2Output: '',
-        step3: '[DEFAULT_AGENT] If business consultation, output: Business consultation, you can submit through official website www.yida.com',
-        step3Output: '',
+        description:
+          'Experience AI intelligent analysis of user needs and dynamic generation of relevant form fields',
+        url: 'https://github.com/talk-flow/public-usecase/blob/main/eng/form-input-demo.md',
+      },
+      imagePdfRecognition: {
+        title: 'Image & PDF Recognition',
+        description:
+          'Upload images or PDFs and extract text content using OCR technology (demonstrates file processing capabilities)',
+        url: 'https://github.com/talk-flow/public-usecase/blob/main/chn/image-pdf-recognition.md',
       },
     },
   },
@@ -1152,7 +1166,7 @@ const words: I18nType = {
       executing: 'Executing',
       pending: 'Pending',
       inProgress: 'In Progress',
-      unknown: 'Unknown'
+      unknown: 'Unknown',
     },
     // Nested sub-plan related
     nestedSubPlans: 'Nested Sub-Plans',
@@ -1221,7 +1235,7 @@ const words: I18nType = {
     updateTime: 'Update Time',
     active: 'Active',
     inactive: 'Inactive',
-    template: 'Example: Help me collect today\'s AI news every day at 8 AM',
+    template: "Example: Help me collect today's AI news every day at 8 AM",
     planTemplate: 'Plan Template',
     linkTemplate: 'Link Template',
     noTemplate: 'No Template',
@@ -1238,15 +1252,17 @@ const words: I18nType = {
   // MCP Service
   mcpService: {
     title: 'MCP Service',
-    createService: 'Create MCP Service',
-    updateService: 'Update MCP Service',
+    createService: 'Create Service',
+    updateService: 'Update Service',
     endpoint: 'Endpoint',
     endpointRequired: 'Endpoint *',
     endpointPlaceholder: 'Please select or enter endpoint',
-    endpointDescription: 'Endpoint is required for MCP service connection, e.g. http://localhost:port/[endpoint]',
+    endpointDescription:
+      'Endpoint is required for MCP service connection, e.g. http://localhost:port/[endpoint]',
     httpEndpointRequired: 'HTTP Endpoint *',
     httpEndpointPlaceholder: 'Please enter HTTP endpoint address',
-    httpEndpointDescription: 'HTTP POST service endpoint address for calling this function via HTTP interface',
+    httpEndpointDescription:
+      'HTTP POST service endpoint address for calling this function via HTTP interface',
     copy: 'Copy',
     copyFailed: 'Copy failed',
     selectEndpoint: 'Select Endpoint',
@@ -1257,19 +1273,24 @@ const words: I18nType = {
     copyUrl: 'Double-click to copy',
     toolName: 'Tool Name',
     toolNameRequired: 'Tool Name *',
-    toolNamePlaceholder: 'Please enter tool name',
-    toolNameDescription: 'Tell the model what this tool is called, also for your identification and modification',
+    toolNamePlaceholder: 'Please enter tool name, recommended to use English name for HTTP calls',
+    toolNameDescription:
+      'Tell the model what this tool is called, also for your identification and modification',
     toolDescription: 'Tool Description',
     toolDescriptionRequired: 'Tool Description *',
     toolDescriptionPlaceholder: 'Please enter tool description',
-    toolDescriptionDescription: 'Tell the model when to use this tool. The more detailed you write (when to choose, when not to choose), the more accurate the model will be in selecting tools.',
+    toolDescriptionDescription:
+      'Tell the model when to use this tool. The more detailed you write (when to choose, when not to choose), the more accurate the model will be in selecting tools.',
     serviceGroup: 'Service Group *',
     serviceGroupPlaceholder: 'Please enter service group',
-    serviceGroupDescription: 'Used to group tools, making it easier for you to find your tool among many tools.',
+    serviceGroupDescription:
+      'Used to group tools, making it easier for you to find your tool among many tools.',
     parameterConfig: 'Parameter Configuration',
-    parameterConfigDescription: 'Use {placeholder} to add parameters and descriptions in the original execution content',
+    parameterConfigDescription:
+      'Use {placeholder} to add parameters and descriptions in the original execution content',
     parameterName: 'Parameter Name',
-    parameterDescription: 'Parameter Description (Tell the model how to fill this parameter to meet your requirements, the more detailed with examples the better)',
+    parameterDescription:
+      'Parameter Description (Tell the model how to fill this parameter to meet your requirements, the more detailed with examples the better)',
     addParameter: 'Add Parameter',
     removeParameter: 'Remove Parameter',
     save: 'Save',
@@ -1277,25 +1298,29 @@ const words: I18nType = {
     publish: 'Publish',
     publishAsService: 'Publish as Service',
     publishAsMcpService: 'Also publish as MCP service',
-    publishAsMcpServiceDescription: 'When checked, this will be published as an MCP service that others can connect to via endpoint',
+    publishAsMcpServiceDescription:
+      'When checked, this will be published as an MCP service that others can connect to via endpoint',
     publishAsHttpService: 'Publish as HTTP service',
-    publishAsHttpServiceDescription: 'When checked, this will be published as an HTTP POST service that can be called via HTTP interface',
+    publishAsHttpServiceDescription:
+      'When checked, this will be published as an HTTP POST service that can be called via HTTP interface',
     publishAsInternalToolcall: 'Publish as Internal Toolcall',
-    publishAsInternalToolcallDescription: 'When checked, this will be published as an internal tool that can be used by agents in their tool configuration',
+    publishAsInternalToolcallDescription:
+      'When checked, this will be published as an internal tool that can be used by agents in their tool configuration',
     publishing: 'Publishing...',
     delete: 'Delete',
     deleting: 'Deleting...',
     published: 'Published',
     unpublished: 'Unpublished',
-    saveSuccess: 'MCP service saved successfully',
-    saveFailed: 'Failed to save MCP service',
-    publishSuccess: 'MCP service published successfully',
+    saveSuccess: 'Service saved successfully',
+    saveFailed: 'Failed to save service',
+    publishSuccess: 'Service published successfully',
     httpPublishSuccess: 'HTTP service published successfully',
-    publishFailed: 'Failed to publish MCP service',
-    deleteSuccess: 'MCP service deleted successfully',
-    deleteFailed: 'Failed to delete MCP service',
+    publishFailed: 'Service publish failed',
+    deleteSuccess: 'Service deleted successfully',
+    deleteFailed: 'Failed to delete service',
     deleteConfirm: 'Confirm Delete',
-    deleteConfirmMessage: 'Are you sure you want to delete this MCP service? This action cannot be undone.',
+    deleteConfirmMessage:
+      'Are you sure you want to delete this service? This action cannot be undone.',
     loadEndpointsFailed: 'Failed to load endpoints',
     loadToolDataFailed: 'Failed to load tool data',
     parseInputSchemaFailed: 'Failed to parse input schema',
@@ -1307,6 +1332,11 @@ const words: I18nType = {
     toolNameRequiredError: 'Tool name is required',
     toolDescriptionRequiredError: 'Tool description is required',
   },
+
+  // Missing translation keys for basicConfig.vue
+  dpi: 'DPI',
+  imageType: 'Image Type',
+  maxRetryAttempts: 'Max Retry Attempts',
 
   memory: {
     title: 'Memory Management',
